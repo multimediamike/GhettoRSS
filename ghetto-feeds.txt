@@ -1,0 +1,4 @@
+feed://xkcd.com/rss.xml
+feed://multimedia.cx/eggs/feed/
+http://feeds.feedburner.com/codinghorror/
+http://feeds.feedburner.com/vintagecomputing

@@ -1,0 +1,90 @@
+<html>
+
+<head>
+<!-- Combo-handled YUI CSS files: -->
+<!--<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?2.8.0r4/build/datatable/assets/skins/sam/datatable.css">-->
+<link rel="stylesheet" type="text/css" href="/static/yui-datatable.css">
+
+<!-- Combo-handled YUI JS files: -->
+<script type="text/javascript" src="/static/yui.js"></script>
+<!-- <script type="text/javascript" src="http://yui.yahooapis.com/combo?2.8.0r4/build/yahoo-dom-event/yahoo-dom-event.js&2.8.0r4/build/dragdrop/dragdrop-min.js&2.8.0r4/build/element/element-min.js&2.8.0r4/build/datasource/datasource-min.js&2.8.0r4/build/datatable/datatable-min.js"></script>-->
+
+</head>
+
+<body class="yui-skin-sam">
+<!-- <body> -->
+
+<script type='text/javascript'> 
+
+var LoadPosts = function(feed_id) {
+    YAHOO.example.XHR_JSON1 = new function() {
+        this.formatUrl = function(elCell, oRecord, oColumn, sData) {
+            elCell.innerHTML = "<a href='/post/" + oRecord.getData("post_id") + "' target='_blank'>" + sData + "</a>";
+        };
+
+        var myColumnDefs = [
+            {key:"title", label:"Title", sortable:true, formatter:this.formatUrl},
+            {key:"author", label:"Author", sortable:true},
+            {key:"date", label:"Date", sortable:true}
+        ];
+
+        this.myDataSource = new YAHOO.util.DataSource("/json/feed/" + feed_id);
+        this.myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
+        this.myDataSource.connXhrMode = "queueRequests";
+        this.myDataSource.responseSchema = {
+            resultsList: "ResultSet",
+            fields: ["title","author","date","post_id"]
+        };
+
+        this.myDataTable = new YAHOO.widget.DataTable("json", myColumnDefs,
+                this.myDataSource, {caption:"Post Index"});
+
+        var myCallback = function() {
+            this.set("sortedBy", null);
+            this.onDataReturnAppendRows.apply(this,arguments);
+        };
+    };
+};
+
+
+function LoadFeeds() {
+    YAHOO.example.XHR_JSON2 = new function() {
+        this.formatUrl = function(elCell, oRecord, oColumn, sData) {
+            elCell.innerHTML = "<a href='javascript:void(LoadPosts(" + oRecord.getData("feed_id") + "));'>" + sData + "</a>";
+        };
+
+        var myColumnDefs = [
+            {key:"feed_title", label:"Title", sortable:true, formatter:this.formatUrl},
+            {key:"unread_count", label:"# Unread", sortable:true}
+        ];
+
+        this.myDataSource = new YAHOO.util.DataSource("/json/feeds");
+        this.myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
+        this.myDataSource.connXhrMode = "queueRequests";
+        this.myDataSource.responseSchema = {
+            resultsList: "ResultSet",
+            fields: ["feed_id","feed_title","unread_count"]
+        };
+
+        this.myDataTable = new YAHOO.widget.DataTable("json", myColumnDefs,
+                this.myDataSource, {caption:"Feed Index"});
+
+        var myCallback = function() {
+            this.set("sortedBy", null);
+            this.onDataReturnAppendRows.apply(this,arguments);
+        };
+    };
+}
+
+
+YAHOO.util.Event.addListener(window, "load", LoadFeeds);
+
+</script>
+
+<div id="json"></div>
+<div><a href='javascript:void(LoadFeeds());'>Return to feed index</a></div>
+
+</body>
+
+</html>
+
