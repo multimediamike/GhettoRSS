@@ -24,7 +24,7 @@ In Ubuntu Linux, this can be installed through the package manager via:
 
 Usage
 =====
-There are 3 main files is play:
+There are 3 main files in play:
 
 * ghetto-feeds.txt
 * ghettorss-update.py
