@@ -297,9 +297,9 @@ def process_feed(original_feed):
     # title, and date; if nothing exists, proceed to add it
     for i in xrange(len(rss['entries'])):
         fetch_post(cursor, feed_id, rss['entries'][i])
+        db.commit()
 
     # finish
-    db.commit()
     db.close()
 
 
