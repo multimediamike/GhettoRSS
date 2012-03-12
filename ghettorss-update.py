@@ -209,7 +209,6 @@ def fetch_post(cursor, feed_id, entry):
         title = entry['title']
     else:
         title = "(no title)"
-    print "  Fetching post \"%s\"" % (title)
     if "author" in entry:
         author = entry['author']
     else:
@@ -240,22 +239,26 @@ def fetch_post(cursor, feed_id, entry):
     base_url = link_parse[2]
     if not fetched:
         # fetch the page
-        conn = httplib.HTTPConnection(server)
-        conn.request("GET", base_url, None, {})
-        network_data = None
         try:
+            print "  Fetching post \"%s\"" % (title)
+            conn = httplib.HTTPConnection(server)
+            conn.request("GET", base_url, None, {})
+            network_data = None
             response = conn.getresponse()
             if (response.status == 200):
                 network_data = response.read()
             conn.close()
+            if network_data <> None:
+                # parse the page and download supporting files
+                parser = ImgCssParser(cursor, post_id, server, base_url)
+                parser.feed(network_data)
+                page = parser.get_new_page()
+                cursor.execute("UPDATE posts SET fetched=1, data=? WHERE id=?", (page, post_id))
+
         except ValueError:
             print "  **** Caught a ValueError while fetching %s%s" % (server, base_url)
-        if network_data <> None:
-            # parse the page and download supporting files
-            parser = ImgCssParser(cursor, post_id, server, base_url)
-            parser.feed(network_data)
-            page = parser.get_new_page()
-            cursor.execute("UPDATE posts SET fetched=1, data=? WHERE id=?", (page, post_id))
+        except:
+            print "  Failed."
 
 
 def process_feed(original_feed):
@@ -294,9 +297,9 @@ def process_feed(original_feed):
     # title, and date; if nothing exists, proceed to add it
     for i in xrange(len(rss['entries'])):
         fetch_post(cursor, feed_id, rss['entries'][i])
+        db.commit()
 
     # finish
-    db.commit()
     db.close()
 
 
