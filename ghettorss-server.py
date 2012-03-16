@@ -118,13 +118,13 @@ class GhettoRSSHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             db = connect_to_database()
             cursor = db.cursor()
             cursor.execute("""
-                SELECT 
-                    feeds.id AS feed_id, 
-                    feeds.title AS feed_title, 
+                SELECT
+                    feeds.id AS feed_id,
+                    feeds.title AS feed_title,
                     COUNT(feeds.id) AS unread_count
-                FROM feeds 
-                INNER JOIN posts 
-                ON posts.feed_id=feeds.id 
+                FROM feeds
+                INNER JOIN posts
+                ON posts.feed_id=feeds.id
                 GROUP BY feeds.id
             """)
             # There must be a more elegant way to convert this
@@ -162,10 +162,10 @@ class GhettoRSSHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             db = connect_to_database()
             cursor = db.cursor()
             cursor.execute("""
-                SELECT 
+                SELECT
                     id AS post_id, title, author, date, timestamp, read
                 FROM posts
-                WHERE feed_id=? 
+                WHERE feed_id=?
             """, (feed_id,))
             # SQLite -> Python data structure, so that easy JSON
             # serialization is possible later
@@ -206,21 +206,22 @@ def usage():
   -p, --port=[number]: Port on which to run the HTTP server
 """
 
-port = DEFAULT_HTTP_PORT
-# process command line arguments
-opts, args = getopt.getopt(sys.argv[1:], "hp:", ["help", "port="])
+if __name__ == '__main__':
 
-for opt, arg in opts:
-    if opt in ("-h", "--help"):
-        usage()
-        sys.exit()
-    elif opt in ("-p", "--port"):
-        try:
-            port = int(arg)
-        except ValueError:
-            print "Invalid port number"
+    port = DEFAULT_HTTP_PORT
+    # process command line arguments
+    opts, args = getopt.getopt(sys.argv[1:], "hp:", ["help", "port="])
+
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            usage()
             sys.exit()
+        elif opt in ("-p", "--port"):
+            try:
+                port = int(arg)
+            except ValueError:
+                print "Invalid port number"
+                sys.exit()
 
-# kick off the server
-run(port)
-
+    # kick off the server
+    run(port)
